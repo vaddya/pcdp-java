@@ -112,13 +112,6 @@ public final class ReciprocalArraySum {
         private double value;
 
         /**
-         * @param input Input values
-         */
-        public ReciprocalArraySumTask(double[] input) {
-            this(0, input.length, input);
-        }
-
-        /**
          * Constructor.
          *
          * @param setStartIndexInclusive Set the starting index to begin
