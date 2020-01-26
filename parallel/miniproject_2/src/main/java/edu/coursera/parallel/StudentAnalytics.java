@@ -1,8 +1,9 @@
 package edu.coursera.parallel;
 
 import java.util.*;
+import java.util.Map.Entry;
 
-import static java.util.Comparator.comparing;
+import static java.util.Map.Entry.comparingByValue;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -20,7 +21,7 @@ public final class StudentAnalytics {
      */
     public double averageAgeOfEnrolledStudentsImperative(
             final Student[] studentArray) {
-        List<Student> activeStudents = new ArrayList<Student>();
+        List<Student> activeStudents = new ArrayList<>();
 
         for (Student s : studentArray) {
             if (s.checkIsCurrent()) {
@@ -64,7 +65,7 @@ public final class StudentAnalytics {
      */
     public String mostCommonFirstNameOfInactiveStudentsImperative(
             final Student[] studentArray) {
-        List<Student> inactiveStudents = new ArrayList<Student>();
+        List<Student> inactiveStudents = new ArrayList<>();
 
         for (Student s : studentArray) {
             if (!s.checkIsCurrent()) {
@@ -72,7 +73,7 @@ public final class StudentAnalytics {
             }
         }
 
-        Map<String, Integer> nameCounts = new HashMap<String, Integer>();
+        Map<String, Integer> nameCounts = new HashMap<>();
 
         for (Student s : inactiveStudents) {
             if (nameCounts.containsKey(s.getFirstName())) {
@@ -85,7 +86,7 @@ public final class StudentAnalytics {
 
         String mostCommon = null;
         int mostCommonCount = -1;
-        for (Map.Entry<String, Integer> entry : nameCounts.entrySet()) {
+        for (Entry<String, Integer> entry : nameCounts.entrySet()) {
             if (mostCommon == null || entry.getValue() > mostCommonCount) {
                 mostCommon = entry.getKey();
                 mostCommonCount = entry.getValue();
@@ -113,8 +114,8 @@ public final class StudentAnalytics {
                 .collect(groupingBy(identity(), counting()))
                 .entrySet()
                 .parallelStream()
-                .max(comparing(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
+                .max(comparingByValue())
+                .map(Entry::getKey)
                 .orElse(null);
     }
 

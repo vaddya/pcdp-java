@@ -1,13 +1,12 @@
 package edu.coursera.parallel;
 
-import java.util.Random;
 import java.util.concurrent.Phaser;
 
 import junit.framework.TestCase;
 
 public class OneDimAveragingPhaserTest extends TestCase {
     // Number of times to repeat each test, for consistent timing results.
-    final static private int niterations = 12000;
+    final static private int niterations = 20000;
 
     private static int getNCores() {
         String ncoresStr = System.getenv("COURSERA_GRADER_NCORES");

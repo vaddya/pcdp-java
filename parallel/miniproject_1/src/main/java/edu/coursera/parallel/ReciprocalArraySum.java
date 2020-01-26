@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 
-import static edu.rice.pcdp.PCDP.async;
-import static edu.rice.pcdp.PCDP.finish;
-
 /**
  * Class wrapping methods for implementing reciprocal array sum in parallel.
  */
@@ -60,7 +57,8 @@ public final class ReciprocalArraySum {
      * nElements
      */
     private static int getChunkStartInclusive(final int chunk,
-                                              final int nChunks, final int nElements) {
+                                              final int nChunks,
+                                              final int nElements) {
         final int chunkSize = getChunkSize(nChunks, nElements);
         return chunk * chunkSize;
     }
@@ -74,15 +72,12 @@ public final class ReciprocalArraySum {
      * @param nElements The number of elements to chunk across
      * @return The exclusive end index for this chunk
      */
-    private static int getChunkEndExclusive(final int chunk, final int nChunks,
+    private static int getChunkEndExclusive(final int chunk,
+                                            final int nChunks,
                                             final int nElements) {
         final int chunkSize = getChunkSize(nChunks, nElements);
         final int end = (chunk + 1) * chunkSize;
-        if (end > nElements) {
-            return nElements;
-        } else {
-            return end;
-        }
+        return Math.min(end, nElements);
     }
 
     /**
@@ -160,9 +155,6 @@ public final class ReciprocalArraySum {
         }
     }
 
-    private static double sum1;
-    private static double sum2;
-
     /**
      * TODO: Modify this method to compute the same reciprocal sum as
      * seqArraySum, but use two tasks running in parallel under the Java Fork
@@ -176,22 +168,14 @@ public final class ReciprocalArraySum {
         assert input.length % 2 == 0;
 
         final int mid = input.length / 2;
-        sum1 = 0.0;
-        sum2 = 0.0;
-        finish(() -> {
-                   async(() -> {
-                       for (int i = 0; i < mid; i++) {
-                           sum1 += 1 / input[i];
-                       }
-                   });
-                   sum2 = 0.0;
-                   for (int i = mid; i < input.length; i++) {
-                       sum2 += 1 / input[i];
-                   }
-               }
-        );
+        double sum1 = 0.0;
+        double sum2 = 0.0;
 
-        return sum1 + sum2;
+        ReciprocalArraySumTask left = new ReciprocalArraySumTask(0, mid, input);
+        ReciprocalArraySumTask right = new ReciprocalArraySumTask(mid, input.length, input);
+        ForkJoinTask.invokeAll(left, right);
+
+        return left.getValue() + right.getValue();
     }
 
     /**

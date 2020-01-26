@@ -117,6 +117,7 @@ public class ReciprocalArraySumTest extends TestCase {
         final double speedup = parTestHelper(2_000_000, false, 2);
         final String errMsg = String.format("It was expected that the two-task parallel implementation would run at " +
                                             "least %fx faster, but it only achieved %fx speedup", minimalExpectedSpeedup, speedup);
+        System.out.println("Speedup: " + speedup);
         assertTrue(errMsg, speedup >= minimalExpectedSpeedup);
     }
 
@@ -128,6 +129,7 @@ public class ReciprocalArraySumTest extends TestCase {
         final double minimalExpectedSpeedup = 1.5;
         final String errMsg = String.format("It was expected that the two-task parallel implementation would run at " +
                                             "least %fx faster, but it only achieved %fx speedup", minimalExpectedSpeedup, speedup);
+        System.out.println("Speedup: " + speedup);
         assertTrue(errMsg, speedup >= minimalExpectedSpeedup);
     }
 
@@ -140,6 +142,7 @@ public class ReciprocalArraySumTest extends TestCase {
         final double speedup = parTestHelper(2_000_000, true, ncores);
         final String errMsg = String.format("It was expected that the many-task parallel implementation would run at " +
                                             "least %fx faster, but it only achieved %fx speedup", minimalExpectedSpeedup, speedup);
+        System.out.println("Speedup: " + speedup);
         assertTrue(errMsg, speedup >= minimalExpectedSpeedup);
     }
 
@@ -152,6 +155,7 @@ public class ReciprocalArraySumTest extends TestCase {
         final double minimalExpectedSpeedup = (double) ncores * 0.8;
         final String errMsg = String.format("It was expected that the many-task parallel implementation would run at " +
                                             "least %fx faster, but it only achieved %fx speedup", minimalExpectedSpeedup, speedup);
+        System.out.println("Speedup: " + speedup);
         assertTrue(errMsg, speedup >= minimalExpectedSpeedup);
     }
 }
