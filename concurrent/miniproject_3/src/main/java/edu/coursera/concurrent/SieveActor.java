@@ -8,7 +8,7 @@ import static edu.rice.pcdp.PCDP.finish;
  * An actor-based implementation of the Sieve of Eratosthenes.
  * <p>
  * TODO Fill in the empty SieveActorActor actor class below and use it from
- * countPrimes to determin the number of primes <= limit.
+ * countPrimes to determine the number of primes <= limit.
  */
 public final class SieveActor extends Sieve {
     /**
@@ -43,7 +43,7 @@ public final class SieveActor extends Sieve {
      * parallel.
      */
     public static final class SieveActorActor extends Actor {
-        private static final int MAX_PRIMES = 10_000;
+        private static final int MAX_PRIMES = 100;
 
         private final int[] primes;
         private int primesCount;

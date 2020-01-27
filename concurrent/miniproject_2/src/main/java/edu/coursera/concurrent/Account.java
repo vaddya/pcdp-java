@@ -8,7 +8,7 @@ public final class Account {
     /**
      * Unique ID number for this account.
      */
-    private int id;
+    private final int id;
 
     /**
      * Current balance of this account.

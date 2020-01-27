@@ -133,7 +133,7 @@ public final class CoarseLists {
          * TODO Declare a read-write lock for this class to be used in
          * implementing the concurrent add, remove, and contains methods below.
          */
-        ReadWriteLock lock = new ReentrantReadWriteLock();
+        private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
         /**
          * Default constructor.

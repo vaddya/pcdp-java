@@ -12,6 +12,5 @@ public abstract class ThreadSafeBankTransaction {
      * @param src Source account
      * @param dst Destination account
      */
-    public abstract void issueTransfer(final int amount, final Account src,
-            final Account dst);
+    public abstract void issueTransfer(final int amount, final Account src, final Account dst);
 }

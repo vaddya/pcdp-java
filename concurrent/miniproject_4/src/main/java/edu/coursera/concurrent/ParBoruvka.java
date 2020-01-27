@@ -1,13 +1,13 @@
 package edu.coursera.concurrent;
 
-import edu.coursera.concurrent.AbstractBoruvka;
-import edu.coursera.concurrent.SolutionToBoruvka;
 import edu.coursera.concurrent.boruvka.Edge;
 import edu.coursera.concurrent.boruvka.Component;
 
 import java.util.Queue;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A parallel implementation of Boruvka's algorithm to compute a Minimum
@@ -26,9 +26,46 @@ public final class ParBoruvka extends AbstractBoruvka<ParBoruvka.ParComponent> {
      * {@inheritDoc}
      */
     @Override
-    public void computeBoruvka(final Queue<ParComponent> nodesLoaded,
-            final SolutionToBoruvka<ParComponent> solution) {
-        throw new UnsupportedOperationException();
+    public void computeBoruvka(final Queue<ParComponent> nodesLoaded, final SolutionToBoruvka<ParComponent> solution) {
+        ParComponent node;
+        while ((node = nodesLoaded.poll()) != null) {
+            if (!node.lock.tryLock()) {
+                continue;
+            }
+
+            if (node.isDead) {
+                node.lock.unlock();
+                continue;
+            }
+
+            Edge<ParComponent> edge = node.getMinEdge();
+            if (edge == null) {
+                solution.setSolution(node);
+                break;
+            }
+
+            ParComponent other = edge.getOther(node);
+            if (!other.lock.tryLock()) {
+                node.lock.unlock();
+                nodesLoaded.add(node);
+                continue;
+            }
+
+            if (other.isDead) {
+                node.lock.unlock();
+                other.lock.unlock();
+                nodesLoaded.add(node);
+                continue;
+            }
+
+            other.isDead = true;
+            node.merge(other, edge.weight());
+
+            node.lock.unlock();
+            other.lock.unlock();
+            
+            nodesLoaded.add(node);
+        }
     }
 
     /**
@@ -42,6 +79,8 @@ public final class ParBoruvka extends AbstractBoruvka<ParBoruvka.ParComponent> {
          *  it.
          */
         public final int nodeId;
+
+        final Lock lock = new ReentrantLock();
 
         /**
          * List of edges attached to this component, sorted by weight from least

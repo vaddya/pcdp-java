@@ -44,6 +44,7 @@ public class SieveTest extends TestCase {
 
             if (prev > 0) {
                 double scalability = (double)prev / (double)elapsed;
+                System.out.println("Scalability: " + scalability);
                 assertTrue(String.format("Expected scalability of %fx going from %d cores to %d cores, but found %fx",
                         expectedScalability, cores / 2, cores, scalability), scalability >= expectedScalability);
             }
@@ -66,6 +67,7 @@ public class SieveTest extends TestCase {
 
             if (prev > 0) {
                 double scalability = (double)prev / (double)elapsed;
+                System.out.println("Scalability: " + scalability);
                 assertTrue(String.format("Expected scalability of %fx going from %d cores to %d cores, but found %fx",
                         expectedScalability, cores / 2, cores, scalability), scalability >= expectedScalability);
             }

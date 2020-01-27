@@ -28,8 +28,7 @@ public final class SeqEdge extends Edge<SeqComponent>
      * @param to To edges.
      * @param w Weight of this edge.
      */
-    protected SeqEdge(final SeqComponent from, final SeqComponent to,
-            final double w) {
+    protected SeqEdge(final SeqComponent from, final SeqComponent to, final double w) {
         fromComponent = from;
         toComponent = to;
         weight = w;
@@ -94,8 +93,7 @@ public final class SeqEdge extends Edge<SeqComponent>
     /**
      * {@inheritDoc}
      */
-    public SeqEdge replaceComponent(final SeqComponent from,
-            final SeqComponent to) {
+    public SeqEdge replaceComponent(final SeqComponent from, final SeqComponent to) {
         if (fromComponent == from) {
             fromComponent = to;
         }
