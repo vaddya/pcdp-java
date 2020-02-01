@@ -1,6 +1,12 @@
 package edu.coursera.distributed;
 
-import org.apache.spark.api.java.JavaRDD;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import scala.Tuple2;
 
@@ -49,6 +55,20 @@ public final class PageRank {
     public static JavaPairRDD<Integer, Double> sparkPageRank(
             final JavaPairRDD<Integer, Website> sites,
             final JavaPairRDD<Integer, Double> ranks) {
-        throw new UnsupportedOperationException();
+        return sites
+                .join(ranks)
+                .flatMapToPair(kv -> {
+                    final Website site = kv._2._1;
+                    final Double rank = kv._2._2;
+                    return toStream(site.edgeIterator())
+                            .map(id -> new Tuple2<>(id, rank / site.getNEdges()))
+                            .collect(Collectors.toList());
+                })
+                .reduceByKey(Double::sum)
+                .mapValues(v -> 0.15 + 0.85 * v);
+    }
+
+    private static <T> Stream<T> toStream(final Iterator<T> it) {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false);
     }
 }
