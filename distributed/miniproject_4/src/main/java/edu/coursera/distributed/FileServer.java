@@ -1,12 +1,16 @@
 package edu.coursera.distributed;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.File;
+import java.util.StringJoiner;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * A basic and very limited implementation of a file server that responds to GET
@@ -28,18 +32,15 @@ public final class FileServer {
      *                     implementation is not expected to ever throw
      *                     IOExceptions during normal operation.
      */
-    public void run(final ServerSocket socket, final PCDPFilesystem fs,
-            final int ncores) throws IOException {
+    public void run(final ServerSocket socket, final PCDPFilesystem fs, final int ncores) throws IOException {
+        final Executor executor = Executors.newFixedThreadPool(ncores);
         /*
          * Enter a spin loop for handling client requests to the provided
          * ServerSocket object.
          */
         while (true) {
-
-            // TODO Delete this once you start working on your solution.
-            throw new UnsupportedOperationException();
-
             // TODO 1) Use socket.accept to get a Socket object
+            Socket client = socket.accept();
 
             /*
              * TODO 2) Now that we have a new Socket object, handle the parsing
@@ -77,6 +78,45 @@ public final class FileServer {
              * If you wish to do so, you are free to re-use code from
              * MiniProject 2 to help with completing this MiniProject.
              */
+            executor.execute(() -> processRequest(client, fs));
         }
+    }
+    
+    private void processRequest(final Socket client, final PCDPFilesystem fs) {
+        try {
+            String path = parseRequestPath(client.getInputStream());
+            String content = fs.readFile(new PCDPPath(path));
+            final OutputStream os = client.getOutputStream();
+            final String response;
+            if (content != null) {
+                response = createResponse(200, "OK", content);
+            } else {
+                response = createResponse(404, "Not Found", null);
+            }
+            os.write(response.getBytes());
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String createResponse(final int code, final String message, final String content) {
+        final StringJoiner joiner = new StringJoiner("\r\n", "", "\r\n");
+        joiner.add(String.format("HTTP/1.0 %d %s", code, message));
+        joiner.add("Server: FileServer");
+        joiner.add("");
+        if (content != null) {
+            joiner.add(content);
+        }
+        return joiner.toString();
+    }
+
+    private static String parseRequestPath(final InputStream is) throws IOException {
+        final String request = new BufferedReader(new InputStreamReader(is)).readLine();
+        final String[] components = request.split(" ");
+        if (components.length < 2) {
+            throw new IllegalArgumentException("Illegal HTTP request: " + request);
+        }
+        return components[1];
     }
 }
