@@ -1,12 +1,14 @@
 package edu.coursera.distributed;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.File;
+import java.util.StringJoiner;
 
 /**
  * A basic and very limited implementation of a file server that responds to GET
@@ -17,25 +19,21 @@ public final class FileServer {
      * Main entrypoint for the basic file server.
      *
      * @param socket Provided socket to accept connections on.
-     * @param fs A proxy filesystem to serve files from. See the PCDPFilesystem
-     *           class for more detailed documentation of its usage.
+     * @param fs     A proxy filesystem to serve files from. See the PCDPFilesystem
+     *               class for more detailed documentation of its usage.
      * @throws IOException If an I/O error is detected on the server. This
      *                     should be a fatal error, your file server
      *                     implementation is not expected to ever throw
      *                     IOExceptions during normal operation.
      */
-    public void run(final ServerSocket socket, final PCDPFilesystem fs)
-            throws IOException {
+    public void run(final ServerSocket socket, final PCDPFilesystem fs) throws IOException {
         /*
          * Enter a spin loop for handling client requests to the provided
          * ServerSocket object.
          */
         while (true) {
-
-            // TODO Delete this once you start working on your solution.
-            throw new UnsupportedOperationException();
-
             // TODO 1) Use socket.accept to get a Socket object
+            Socket client = socket.accept();
 
             /*
              * TODO 2) Using Socket.getInputStream(), parse the received HTTP
@@ -46,6 +44,8 @@ public final class FileServer {
              *
              *     GET /path/to/file HTTP/1.1
              */
+            String path = parseRequestPath(client.getInputStream());
+            String content = fs.readFile(new PCDPPath(path));
 
             /*
              * TODO 3) Using the parsed path to the target file, construct an
@@ -67,6 +67,35 @@ public final class FileServer {
              *
              * Don't forget to close the output stream.
              */
+            final OutputStream os = client.getOutputStream();
+            final String response;
+            if (content != null) {
+                response = createResponse(200, "OK", content);
+            } else {
+                response = createResponse(404, "Not Found", null);
+            }
+            os.write(response.getBytes());
+            os.close();
         }
+    }
+
+    private static String createResponse(final int code, final String message, final String content) {
+        final StringJoiner joiner = new StringJoiner("\r\n", "", "\r\n");
+        joiner.add(String.format("HTTP/1.0 %d %s", code, message));
+        joiner.add("Server: FileServer");
+        joiner.add("");
+        if (content != null) {
+            joiner.add(content);
+        }
+        return joiner.toString();
+    }
+
+    private static String parseRequestPath(final InputStream is) throws IOException {
+        final String request = new BufferedReader(new InputStreamReader(is)).readLine();
+        final String[] components = request.split(" ");
+        if (components.length < 2) {
+            throw new IllegalArgumentException("Illegal HTTP request: " + request);
+        }
+        return components[1];
     }
 }
