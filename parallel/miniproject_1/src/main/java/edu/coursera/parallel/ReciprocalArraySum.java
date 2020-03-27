@@ -168,13 +168,9 @@ public final class ReciprocalArraySum {
         assert input.length % 2 == 0;
 
         final int mid = input.length / 2;
-        double sum1 = 0.0;
-        double sum2 = 0.0;
-
         ReciprocalArraySumTask left = new ReciprocalArraySumTask(0, mid, input);
         ReciprocalArraySumTask right = new ReciprocalArraySumTask(mid, input.length, input);
         ForkJoinTask.invokeAll(left, right);
-
         return left.getValue() + right.getValue();
     }
 
@@ -190,8 +186,6 @@ public final class ReciprocalArraySum {
      */
     protected static double parManyTaskArraySum(final double[] input,
                                                 final int numTasks) {
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "8");
-
         List<ReciprocalArraySumTask> tasks = new ArrayList<>();
         for (int i = 0; i < numTasks; i++) {
             ReciprocalArraySumTask task = new ReciprocalArraySumTask(
